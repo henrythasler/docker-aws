@@ -13,7 +13,7 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...          
-      - VERSION=date +'%Y-%m-%d_%H-%M-%S'
+      - VERSION=$( date +'%Y-%m-%d_%H-%M-%S' )
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG -t $IMAGE_REPO_NAME:$VERSION.
       - docker tag $IMAGE_REPO_NAME:$VERSION $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$VERSION
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
