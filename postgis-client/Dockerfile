@@ -14,9 +14,11 @@ RUN apk upgrade --update \
     && apk add \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
         postgis=~2.5 \
-        aws-cli=~1.16
+        aws-cli=~1.16 \
+    && rm -rf /var/cache/apk/*
 
 ADD fetch_and_run.sh /usr/local/bin/fetch_and_run.sh
+RUN chmod +x /usr/local/bin/fetch_and_run.sh
 WORKDIR /tmp
 USER nobody
 ENTRYPOINT ["/usr/local/bin/fetch_and_run.sh"]
