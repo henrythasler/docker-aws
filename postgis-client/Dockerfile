@@ -1,3 +1,24 @@
+### build environment
+FROM golang:1.12.6-alpine3.10 AS build
+
+### update apk and existing packages
+RUN apk upgrade --update &&\
+    ### build packages
+    apk add \
+        build-base \    
+        git \
+    && apk add \
+        --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
+        leveldb-dev \
+    && apk add \
+        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+        geos-dev
+RUN go get github.com/omniscale/imposm3 \
+    # && ( cd /go/src/github.com/omniscale/imposm3 \
+    #     && TAG=$(git name-rev --tags --name-only $(git rev-parse --short HEAD))  ) \
+    # && go build -X github.com/omniscale/imposm3.Version=$(TAG)
+    && go install github.com/omniscale/imposm3/cmd/imposm
+
 FROM alpine:3.10.0
 # This docker-images can be run in AWS batch.
 
@@ -5,20 +26,28 @@ FROM alpine:3.10.0
 RUN apk upgrade --update \
     ### packages from main repo
     && apk add \
-        bash=~5.0 \ 
-        wget=~1.20 \
-        curl=~7.65 \
-        git=~2.22 \
-        postgresql-client=~11.3 \
-    ### packages from testing repo
+        bash \ 
+        wget \
+        curl \
+        git \
+        postgresql-client \
+    ### packages from other repos
+    && apk add \
+        --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
+        leveldb \
     && apk add \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
-        postgis=~2.5 \
-        aws-cli=~1.16 \
+        postgis \
+        aws-cli \
+        geos \
     && rm -rf /var/cache/apk/*
 
 ADD fetch_and_run.sh /usr/local/bin/fetch_and_run.sh
 RUN chmod +x /usr/local/bin/fetch_and_run.sh
+
+### add imposm binary
+COPY --from=build /go/bin/imposm /usr/local/bin/
+
 WORKDIR /tmp
 USER nobody
 ENTRYPOINT ["/usr/local/bin/fetch_and_run.sh"]
