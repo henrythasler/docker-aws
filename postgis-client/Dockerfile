@@ -40,6 +40,7 @@ RUN apk upgrade --update \
         postgis \
         aws-cli \
         geos \
+        proj-dev \
     && rm -rf /var/cache/apk/*
 
 ADD fetch_and_run.sh /usr/local/bin/fetch_and_run.sh
