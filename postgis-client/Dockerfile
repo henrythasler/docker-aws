@@ -50,6 +50,7 @@ RUN chmod +x /usr/local/bin/fetch_and_run.sh
 COPY --from=build /go/bin/imposm /usr/local/bin/
 
 COPY grids /grids/
+RUN chmod -R +r /grids
 
 WORKDIR /tmp
 USER nobody
