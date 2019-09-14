@@ -20,7 +20,7 @@ RUN go get github.com/omniscale/imposm3 \
     && go install github.com/omniscale/imposm3/cmd/imposm
 
 FROM alpine:3.10.0
-# This docker-images can be run in AWS batch.
+# This docker-image can be run in AWS batch.
 
 ### update apk and existing packages
 RUN apk upgrade --update \
@@ -43,11 +43,13 @@ RUN apk upgrade --update \
         proj-dev \
     && rm -rf /var/cache/apk/*
 
-ADD fetch_and_run.sh /usr/local/bin/fetch_and_run.sh
+COPY fetch_and_run.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/fetch_and_run.sh
 
 ### add imposm binary
 COPY --from=build /go/bin/imposm /usr/local/bin/
+
+COPY grids /grids/
 
 WORKDIR /tmp
 USER nobody
