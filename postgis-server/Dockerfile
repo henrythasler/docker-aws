@@ -56,18 +56,18 @@ RUN apk upgrade --update \
         boost-serialization \
 #
 ### CGAL: Source download, verify and extract
-    && wget $CGAL_SOURCE -O /tmp/CGAL-$CGAL_VERSION.tar.xz \
+    && wget -nv $CGAL_SOURCE -O /tmp/CGAL-$CGAL_VERSION.tar.xz \
     && echo "$CGAL_SHA256  /tmp/CGAL-$CGAL_VERSION.tar.xz" | sha256sum -c - \
     && mkdir -p /usr/src \
     && tar xf /tmp/CGAL-$CGAL_VERSION.tar.xz -C /usr/src \
 #
 ### SFCGAL: Source download, verify and extract
-    && wget $SFCGAL_SOURCE -O /tmp/SFCGAL-$SFCGAL_VERSION.tar.gz \
+    && wget -nv $SFCGAL_SOURCE -O /tmp/SFCGAL-$SFCGAL_VERSION.tar.gz \
     && mkdir -p /usr/src \
     && tar xzf /tmp/SFCGAL-$SFCGAL_VERSION.tar.gz -C /usr/src \
 #
 ### postgis: Source download, verify and extract
-    && wget $POSTGIS_SOURCE -O /tmp/postgis-$POSTGIS_VERSION.tar.gz \
+    && wget -nv $POSTGIS_SOURCE -O /tmp/postgis-$POSTGIS_VERSION.tar.gz \
     # && echo "$POSTGIS_SHA256  /tmp/postgis-$POSTGIS_VERSION.tar.gz" | sha256sum -c - \
     && mkdir -p /usr/src \
     && tar xzf /tmp/postgis-$POSTGIS_VERSION.tar.gz -C /usr/src \
