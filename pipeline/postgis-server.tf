@@ -3,7 +3,7 @@ locals {
 }
 
 
-resource "aws_ecr_repository" "ecr_repository" {
+resource "aws_ecr_repository" "postgis_server_ecr_repository" {
   name = "${local.project}"
 }
 
@@ -86,7 +86,7 @@ resource "aws_codebuild_project" "postgis_server_build_project" {
 
     environment_variable {
       name  = "REPOSITORY_URI"
-      value = "${var.repository_url}"
+      value = "${aws_ecr_repository.postgis_server_ecr_repository.repository_url}"
     }
 
     environment_variable {
@@ -97,7 +97,7 @@ resource "aws_codebuild_project" "postgis_server_build_project" {
 
   source {
     type            = "GITHUB"
-    location        = "${var.repository_url}"
+    location        = "${var.git_repository}"
     git_clone_depth = 1
     buildspec       = "${local.project}/buildspec.yml"
   }
