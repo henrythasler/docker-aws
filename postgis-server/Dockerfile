@@ -3,7 +3,7 @@ FROM postgres:11.3-alpine
 ### Versions
 ARG CGAL_VERSION="4.13.1"
 ARG SFCGAL_VERSION="1.3.6"
-ARG POSTGIS_VERSION="2.5.2"
+ARG POSTGIS_VERSION="2.5.1"
 
 ### Download Locations
 ARG CGAL_SOURCE="https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-$CGAL_VERSION/CGAL-$CGAL_VERSION.tar.xz"
@@ -101,4 +101,4 @@ RUN apk upgrade --update \
 
 COPY ./initdb-postgis.sh /docker-entrypoint-initdb.d/postgis.sh
 COPY ./update-postgis.sh /usr/local/bin
-COPY ./postgis.conf /etc/postgresql/postgresql.conf
+COPY ./postgresql.conf /etc/postgresql/postgresql.conf
