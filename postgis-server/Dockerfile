@@ -3,11 +3,13 @@ FROM postgres:11.5-alpine
 ### Versions
 ARG CGAL_VERSION="4.14.1"
 ARG SFCGAL_VERSION="1.3.7"
+ARG PROJ_VERSION="6.1.1"
 ARG POSTGIS_VERSION="2.5.3"
 
 ### Download Locations
 ARG CGAL_SOURCE="https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-$CGAL_VERSION/CGAL-$CGAL_VERSION.tar.xz"
 ARG SFCGAL_SOURCE="https://github.com/Oslandia/SFCGAL/archive/v$SFCGAL_VERSION.tar.gz"
+ARG PROJ_SOURCE="https://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz"
 ARG POSTGIS_SOURCE="https://download.osgeo.org/postgis/source/postgis-$POSTGIS_VERSION.tar.gz"
 
 ### Checksums
@@ -29,6 +31,8 @@ RUN apk upgrade --update \
         mpfr-dev \
         boost-dev \
         libxml2-dev \
+        sqlite \
+        sqlite-dev \
     ### build packages from edge repo
     && apk add --virtual .build-deps-edge \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
@@ -46,7 +50,6 @@ RUN apk upgrade --update \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
         geos \
         gdal-dev \
-        proj-dev \
         protobuf-c \
     && apk add --virtual .postgis-run-deps \
         json-c \
@@ -66,6 +69,13 @@ RUN apk upgrade --update \
     && mkdir -p /usr/src \
     && tar xzf /tmp/SFCGAL-$SFCGAL_VERSION.tar.gz -C /usr/src \
 #
+### PROJ: Source download
+    && wget -nv $PROJ_SOURCE -O /tmp/proj-$PROJ_VERSION.tar.gz \
+    && mkdir -p /usr/src \
+    && tar xzf /tmp/proj-$PROJ_VERSION.tar.gz -C /usr/src \
+    && wget -nv https://download.osgeo.org/proj/proj-datumgrid-1.7.zip -O /tmp/proj-datumgrid-1.7.zip \
+    && unzip -o /tmp/proj-datumgrid-1.7.zip -d /usr/src/proj-$PROJ_VERSION/data/ \
+#
 ### postgis: Source download, verify and extract
     && wget -nv $POSTGIS_SOURCE -O /tmp/postgis-$POSTGIS_VERSION.tar.gz \
     # && echo "$POSTGIS_SHA256  /tmp/postgis-$POSTGIS_VERSION.tar.gz" | sha256sum -c - \
@@ -84,9 +94,14 @@ RUN apk upgrade --update \
     && make -j $(nproc) \
     && make install \
 #
+### PROJ installation
+    && cd /usr/src/proj-6.1.1 \
+    && ./configure \
+    && make -j $(nproc) \
+    && make install \
+#
 ### postgis installation
     && cd /usr/src/postgis-${POSTGIS_VERSION} \
-    && ./autogen.sh \
     && ./configure \
 		--disable-gtktest \
     && make -j $(nproc) \
