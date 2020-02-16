@@ -52,6 +52,8 @@ COPY --from=build /go/bin/imposm /usr/local/bin/
 COPY grids /grids/
 RUN chmod -R 777 /grids
 
+RUN mkdir -p /data
+
 WORKDIR /tmp
 USER nobody
 ENTRYPOINT ["/usr/local/bin/fetch_and_run.sh"]
