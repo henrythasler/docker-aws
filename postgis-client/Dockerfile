@@ -7,12 +7,16 @@ RUN apk upgrade --update &&\
     apk add \
         build-base \    
         git \
+        zlib-dev \
     && apk add \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
         leveldb-dev \
         geos-dev
     # && apk add \
     #     --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+
+RUN wget -O - http://m.m.i24.cc/osmconvert.c | cc -x c - -lz -O3 -o /osmconvert
+
 RUN go get github.com/omniscale/imposm3 \
     # && ( cd /go/src/github.com/omniscale/imposm3 \
     #     && TAG=$(git name-rev --tags --name-only $(git rev-parse --short HEAD))  ) \
@@ -48,6 +52,8 @@ RUN chmod +x /usr/local/bin/fetch_and_run.sh
 
 ### add imposm binary
 COPY --from=build /go/bin/imposm /usr/local/bin/
+
+COPY --from=build /osmconvert /usr/local/bin/
 
 COPY grids /grids/
 RUN chmod -R 777 /grids
