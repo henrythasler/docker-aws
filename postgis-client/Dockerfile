@@ -1,5 +1,5 @@
 ### build environment
-FROM golang:1.12.6-alpine3.10 AS build
+FROM golang:1.13.8-alpine3.11 AS build
 
 ### update apk and existing packages
 RUN apk upgrade --update &&\
@@ -10,16 +10,16 @@ RUN apk upgrade --update &&\
     && apk add \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
         leveldb-dev \
-    && apk add \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
         geos-dev
+    # && apk add \
+    #     --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
 RUN go get github.com/omniscale/imposm3 \
     # && ( cd /go/src/github.com/omniscale/imposm3 \
     #     && TAG=$(git name-rev --tags --name-only $(git rev-parse --short HEAD))  ) \
     # && go build -X github.com/omniscale/imposm3.Version=$(TAG)
     && go install github.com/omniscale/imposm3/cmd/imposm
 
-FROM alpine:3.10.0
+FROM alpine:3.11.3
 # This docker-image can be run in AWS batch.
 
 ### update apk and existing packages
@@ -35,12 +35,12 @@ RUN apk upgrade --update \
     && apk add \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
         leveldb \
-    && apk add \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+        geos \
         postgis \
         aws-cli \
-        geos \
         proj-dev \
+    # && apk add \
+    #     --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
     && rm -rf /var/cache/apk/*
 
 COPY fetch_and_run.sh /usr/local/bin/
@@ -53,6 +53,7 @@ COPY grids /grids/
 RUN chmod -R 777 /grids
 
 RUN mkdir -p /data
+RUN chmod -R 777 /data
 
 WORKDIR /tmp
 USER nobody
