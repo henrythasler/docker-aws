@@ -1,19 +1,19 @@
-FROM postgres:11.5-alpine
+FROM postgres:11.9-alpine
 
 ### Versions
-ARG CGAL_VERSION="4.14.1"
-ARG SFCGAL_VERSION="1.3.7"
-ARG PROJ_VERSION="6.1.1"
-ARG POSTGIS_VERSION="2.5.3"
+ARG CGAL_VERSION="4.14.3"
+ARG SFCGAL_VERSION="1.3.8"
+ARG PROJ_VERSION="6.3.2"
+ARG POSTGIS_VERSION="2.5.5"
 
 ### Download Locations
 ARG CGAL_SOURCE="https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-$CGAL_VERSION/CGAL-$CGAL_VERSION.tar.xz"
-ARG SFCGAL_SOURCE="https://github.com/Oslandia/SFCGAL/archive/v$SFCGAL_VERSION.tar.gz"
+ARG SFCGAL_SOURCE="https://gitlab.com/Oslandia/SFCGAL/-/archive/v$SFCGAL_VERSION/SFCGAL-v$SFCGAL_VERSION.tar.gz"
 ARG PROJ_SOURCE="https://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz"
 ARG POSTGIS_SOURCE="https://download.osgeo.org/postgis/source/postgis-$POSTGIS_VERSION.tar.gz"
 
 ### Checksums
-ARG CGAL_SHA256="d4ec2528b88a7c3a07b0b86db96c216822f85b951bf4bc7f9d1f26bf6c369afe"
+ARG CGAL_SHA256="5bafe7abe8435beca17a1082062d363368ec1e3f0d6581bb0da8b010fb389fe4"
 #ARG POSTGIS_SHA256="b9754c7b9cbc30190177ec34b570717b2b9b88ed271d18e3af68eca3632d1d95"
 
 ### update apk and existing packages
@@ -37,24 +37,38 @@ RUN apk upgrade --update \
     && apk add --virtual .build-deps-edge \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
         openssl-dev \
+        protobuf-c-dev \
+        poppler \
+        clang \
+        llvm10-dev \
     ### build packages from testing repo
     && apk add --virtual .build-deps-testing \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+        \
+    ### build packages from community repo
+    && apk add --virtual .build-deps-community \
+        --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
         geos-dev \
-        protobuf-c-dev \
+    #        
     ### various runtime packages 
     && apk add --virtual .postgis-run-deps-edge \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
         openssl \
+        protobuf-c \
+    # community
+    && apk add --virtual .postgis-run-deps-community \
+        --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
+        gdal-dev \
+        geos \
+    # testing
     && apk add --virtual .postgis-run-deps-testing \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
-        geos \
-        gdal-dev \
-        protobuf-c \
+        \
+    # main
     && apk add --virtual .postgis-run-deps \
         json-c \
         gmp \
-        mpfr3 \
+        mpfr4 \
         boost \
         boost-serialization \
 #
@@ -89,13 +103,13 @@ RUN apk upgrade --update \
     && make install \
 #
 ### SFCGAL installation
-    && cd /usr/src/SFCGAL-${SFCGAL_VERSION} \
+    && cd /usr/src/SFCGAL-v${SFCGAL_VERSION} \
     && cmake . -Wno-dev -Wno-deprecated -Wdeprecated-declarations \
     && make -j $(nproc) \
     && make install \
 #
 ### PROJ installation
-    && cd /usr/src/proj-6.1.1 \
+    && cd /usr/src/proj-${PROJ_VERSION} \
     && ./configure \
     && make -j $(nproc) \
     && make install \
@@ -108,7 +122,7 @@ RUN apk upgrade --update \
     && make install \
 #
 ### clean up files
-    && apk del .build-deps .build-deps-edge .build-deps-testing \
+    && apk del .build-deps .build-deps-edge .build-deps-testing .build-deps-community \
     && rm -rf /tmp/* /var/cache/apk/* /usr/src/* \
 #
 # FIXME - find a way to make postgis use /usr/local/lib64 as location for SFCGAL libraries
