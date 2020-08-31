@@ -1,5 +1,5 @@
 ### build environment
-FROM golang:1.13.8-alpine3.11 AS build
+FROM golang:1.15.0-alpine3.12 AS build
 
 ### update apk and existing packages
 RUN apk upgrade --update &&\
@@ -23,7 +23,7 @@ RUN go get github.com/omniscale/imposm3 \
     # && go build -X github.com/omniscale/imposm3.Version=$(TAG)
     && go install github.com/omniscale/imposm3/cmd/imposm
 
-FROM alpine:3.11.3
+FROM alpine:3.12.0
 # This docker-image can be run in AWS batch.
 
 ### update apk and existing packages
@@ -36,6 +36,9 @@ RUN apk upgrade --update \
         git \
         postgresql-client \
     ### packages from other repos
+    && apk add --virtual .build-deps-edge \
+        --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
+        poppler \
     && apk add \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
         leveldb \
@@ -43,8 +46,6 @@ RUN apk upgrade --update \
         postgis \
         aws-cli \
         proj-dev \
-    # && apk add \
-    #     --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
     && rm -rf /var/cache/apk/*
 
 COPY fetch_and_run.sh /usr/local/bin/
