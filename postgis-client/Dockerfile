@@ -35,6 +35,7 @@ RUN apk upgrade --update \
         curl \
         git \
         postgresql-client \
+        gdal-tools \
     ### packages from other repos
     && apk add --virtual .build-deps-edge \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
