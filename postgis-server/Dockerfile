@@ -1,20 +1,20 @@
-FROM postgres:11.9-alpine
+FROM postgres:14.0-alpine
 
 ### Versions
-ARG CGAL_VERSION="4.14.3"
-ARG SFCGAL_VERSION="1.3.8"
-ARG PROJ_VERSION="6.3.2"
-ARG POSTGIS_VERSION="2.5.5"
+ARG CGAL_VERSION="5.3"
+ARG SFCGAL_VERSION="1.4.0"
+ARG PROJ_VERSION="8.1.1"
+ARG POSTGIS_VERSION="3.1.4"
 
 ### Download Locations
-ARG CGAL_SOURCE="https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-$CGAL_VERSION/CGAL-$CGAL_VERSION.tar.xz"
+ARG CGAL_SOURCE="https://github.com/CGAL/cgal/releases/download/v$CGAL_VERSION/CGAL-$CGAL_VERSION.tar.xz"
 ARG SFCGAL_SOURCE="https://gitlab.com/Oslandia/SFCGAL/-/archive/v$SFCGAL_VERSION/SFCGAL-v$SFCGAL_VERSION.tar.gz"
 ARG PROJ_SOURCE="https://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz"
 ARG POSTGIS_SOURCE="https://download.osgeo.org/postgis/source/postgis-$POSTGIS_VERSION.tar.gz"
 
-### Checksums
-ARG CGAL_SHA256="5bafe7abe8435beca17a1082062d363368ec1e3f0d6581bb0da8b010fb389fe4"
-#ARG POSTGIS_SHA256="b9754c7b9cbc30190177ec34b570717b2b9b88ed271d18e3af68eca3632d1d95"
+### Checksums (MUST match the version)
+ARG CGAL_SHA256="2c242e3f27655bc80b34e2fa5e32187a46003d2d9cd7dbec8fbcbc342cea2fb6"
+ARG PROJ_MD5="f017fd7d35311b0d65b2cf0503844690"
 
 ### update apk and existing packages
 RUN apk upgrade --update \
@@ -40,7 +40,9 @@ RUN apk upgrade --update \
         protobuf-c-dev \
         poppler \
         clang \
-        llvm10-dev \
+        llvm11-dev \
+        tiff-dev \
+        json-c-dev \
     ### build packages from testing repo
     && apk add --virtual .build-deps-testing \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
@@ -83,8 +85,9 @@ RUN apk upgrade --update \
     && mkdir -p /usr/src \
     && tar xzf /tmp/SFCGAL-$SFCGAL_VERSION.tar.gz -C /usr/src \
 #
-### PROJ: Source download
+### PROJ: Source download, verify and extract
     && wget -nv $PROJ_SOURCE -O /tmp/proj-$PROJ_VERSION.tar.gz \
+    && echo "$PROJ_MD5  /tmp/proj-$PROJ_VERSION.tar.gz" | md5sum -c - \
     && mkdir -p /usr/src \
     && tar xzf /tmp/proj-$PROJ_VERSION.tar.gz -C /usr/src \
     && wget -nv https://download.osgeo.org/proj/proj-datumgrid-1.7.zip -O /tmp/proj-datumgrid-1.7.zip \
@@ -96,28 +99,30 @@ RUN apk upgrade --update \
     && mkdir -p /usr/src \
     && tar xzf /tmp/postgis-$POSTGIS_VERSION.tar.gz -C /usr/src \
 #
-### CGAL installation
+### CGAL installation (https://doc.cgal.org/latest/Manual/usage.html#secusingwebsite)
     && cd /usr/src/CGAL-${CGAL_VERSION} \
     && cmake . -Wno-dev \
     && make -j $(nproc) \
     && make install \
 #
-### SFCGAL installation
+### SFCGAL installation (https://oslandia.github.io/SFCGAL/installation.html)
     && cd /usr/src/SFCGAL-v${SFCGAL_VERSION} \
     && cmake . -Wno-dev -Wno-deprecated -Wdeprecated-declarations \
     && make -j $(nproc) \
     && make install \
 #
-### PROJ installation
+### PROJ installation (https://proj.org/install.html)
     && cd /usr/src/proj-${PROJ_VERSION} \
-    && ./configure \
+    && ./configure --without-curl \
     && make -j $(nproc) \
     && make install \
 #
-### postgis installation
+### postgis installation (https://postgis.net/source/)
     && cd /usr/src/postgis-${POSTGIS_VERSION} \
     && ./configure \
 		--disable-gtktest \
+        # FIXME: otherwise LTO produces a "LLVM ERROR: ThinLTO cannot create input file: Invalid record"
+        CFLAGS="-D LLVM_ENABLE_LTO=OFF" \ 
     && make -j $(nproc) \
     && make install \
 #
