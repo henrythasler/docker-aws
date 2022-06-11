@@ -1,10 +1,10 @@
-FROM postgres:14.0-alpine
+FROM postgres:14.3-alpine3.16
 
 ### Versions
-ARG CGAL_VERSION="5.3"
-ARG SFCGAL_VERSION="1.4.0"
-ARG PROJ_VERSION="8.1.1"
-ARG POSTGIS_VERSION="3.1.4"
+ARG CGAL_VERSION="5.4.1"
+ARG SFCGAL_VERSION="1.4.1"
+ARG PROJ_VERSION="9.0.0"
+ARG POSTGIS_VERSION="3.2.1"
 
 ### Download Locations
 ARG CGAL_SOURCE="https://github.com/CGAL/cgal/releases/download/v$CGAL_VERSION/CGAL-$CGAL_VERSION.tar.xz"
@@ -13,19 +13,20 @@ ARG PROJ_SOURCE="https://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz"
 ARG POSTGIS_SOURCE="https://download.osgeo.org/postgis/source/postgis-$POSTGIS_VERSION.tar.gz"
 
 ### Checksums (MUST match the version)
-ARG CGAL_SHA256="2c242e3f27655bc80b34e2fa5e32187a46003d2d9cd7dbec8fbcbc342cea2fb6"
-ARG PROJ_MD5="f017fd7d35311b0d65b2cf0503844690"
+ARG CGAL_SHA256="4c3dd7ee4d36d237111a4d72b6e14170093271595d5b695148532daa95323d76"
+ARG PROJ_MD5="180f9c60f74526690d059219fc7871e0"
+ARG POSTGIS_MD5="c14c6582f72518257bb65198b3fe4dda"
 
 ### update apk and existing packages
 RUN apk upgrade --update \
 #
 ### install dependencies
     && apk add --virtual .build-deps \
-        ### basic build packages              
+        ### basic build packages
         build-base \
         cmake \
         wget \
-        ### additional build packages    
+        ### additional build packages
         perl \
         gmp-dev \
         mpfr-dev \
@@ -33,6 +34,8 @@ RUN apk upgrade --update \
         libxml2-dev \
         sqlite \
         sqlite-dev \
+        curl-dev \
+        llvm13 \
     ### build packages from edge repo
     && apk add --virtual .build-deps-edge \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
@@ -95,7 +98,7 @@ RUN apk upgrade --update \
 #
 ### postgis: Source download, verify and extract
     && wget -nv $POSTGIS_SOURCE -O /tmp/postgis-$POSTGIS_VERSION.tar.gz \
-    # && echo "$POSTGIS_SHA256  /tmp/postgis-$POSTGIS_VERSION.tar.gz" | sha256sum -c - \
+    && echo "$POSTGIS_MD5  /tmp/postgis-$POSTGIS_VERSION.tar.gz" | md5sum -c - \
     && mkdir -p /usr/src \
     && tar xzf /tmp/postgis-$POSTGIS_VERSION.tar.gz -C /usr/src \
 #
@@ -111,9 +114,9 @@ RUN apk upgrade --update \
     && make -j $(nproc) \
     && make install \
 #
-### PROJ installation (https://proj.org/install.html)
+### PROJ installation (https://proj.org/install.html#compilation-and-installation-from-source-code)
     && cd /usr/src/proj-${PROJ_VERSION} \
-    && ./configure --without-curl \
+    && mkdir build && cd build && cmake .. \
     && make -j $(nproc) \
     && make install \
 #
