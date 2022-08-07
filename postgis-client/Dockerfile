@@ -1,10 +1,10 @@
 ### build environment
-FROM golang:1.17.2-alpine3.14 AS build
+FROM golang:1.19.0-alpine3.16 AS build
 
 ### update apk and existing packages
-RUN apk upgrade --update &&\
+RUN apk upgrade --update \
     ### build packages
-    apk add \
+    && apk add \
         build-base \    
         git \
         zlib-dev \
@@ -17,13 +17,9 @@ RUN apk upgrade --update &&\
 
 RUN wget -O - http://m.m.i24.cc/osmconvert.c | cc -x c - -lz -O3 -o /osmconvert
 
-RUN go get github.com/omniscale/imposm3 \
-    # && ( cd /go/src/github.com/omniscale/imposm3 \
-    #     && TAG=$(git name-rev --tags --name-only $(git rev-parse --short HEAD))  ) \
-    # && go build -X github.com/omniscale/imposm3.Version=$(TAG)
-    && go install github.com/omniscale/imposm3/cmd/imposm@latest
+RUN go install github.com/omniscale/imposm3/cmd/imposm@v0.11.1
 
-FROM alpine:3.14.2
+FROM alpine:3.16.1
 # This docker-image can be run in AWS batch.
 
 ### update apk and existing packages
