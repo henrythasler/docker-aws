@@ -1,8 +1,8 @@
 FROM postgres:16.10-alpine3.22
 
 ### Versions
-ARG CGAL_VERSION="5.6.3"
-ARG SFCGAL_VERSION="1.5.2"
+ARG CGAL_VERSION="6.0.2"
+ARG SFCGAL_VERSION="2.2.0"
 ARG PROJ_VERSION="9.7.0"
 ARG POSTGIS_VERSION="3.6.0"
 
@@ -13,7 +13,7 @@ ARG PROJ_SOURCE="https://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz"
 ARG POSTGIS_SOURCE="https://download.osgeo.org/postgis/source/postgis-$POSTGIS_VERSION.tar.gz"
 
 ### Checksums (MUST match the version)
-ARG CGAL_SHA256="15c743cb395d1a0855b9062525f3ae0cd40486489acfe7ce1457c3710ab34111"
+ARG CGAL_SHA256="f30c5be7c25a2a3ea24bccbaab5cf63fafda63c0279f34d7e7f8b3212821fed6"
 ARG PROJ_MD5="b7188aab7a22613a2f5a0bc41c4077b0"
 ARG POSTGIS_MD5="469182b48dddf39c8d26da2e3cca9781"
 
