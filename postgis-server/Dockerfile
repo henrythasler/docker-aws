@@ -1,10 +1,10 @@
-FROM postgres:14.3-alpine3.16
+FROM postgres:16.10-alpine3.22
 
 ### Versions
-ARG CGAL_VERSION="5.4.1"
-ARG SFCGAL_VERSION="1.4.1"
-ARG PROJ_VERSION="9.0.0"
-ARG POSTGIS_VERSION="3.2.1"
+ARG CGAL_VERSION="5.6.3"
+ARG SFCGAL_VERSION="1.5.2"
+ARG PROJ_VERSION="9.7.0"
+ARG POSTGIS_VERSION="3.6.0"
 
 ### Download Locations
 ARG CGAL_SOURCE="https://github.com/CGAL/cgal/releases/download/v$CGAL_VERSION/CGAL-$CGAL_VERSION.tar.xz"
@@ -13,9 +13,9 @@ ARG PROJ_SOURCE="https://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz"
 ARG POSTGIS_SOURCE="https://download.osgeo.org/postgis/source/postgis-$POSTGIS_VERSION.tar.gz"
 
 ### Checksums (MUST match the version)
-ARG CGAL_SHA256="4c3dd7ee4d36d237111a4d72b6e14170093271595d5b695148532daa95323d76"
-ARG PROJ_MD5="180f9c60f74526690d059219fc7871e0"
-ARG POSTGIS_MD5="c14c6582f72518257bb65198b3fe4dda"
+ARG CGAL_SHA256="15c743cb395d1a0855b9062525f3ae0cd40486489acfe7ce1457c3710ab34111"
+ARG PROJ_MD5="b7188aab7a22613a2f5a0bc41c4077b0"
+ARG POSTGIS_MD5="469182b48dddf39c8d26da2e3cca9781"
 
 ### update apk and existing packages
 RUN apk upgrade --update \
@@ -35,7 +35,8 @@ RUN apk upgrade --update \
         sqlite \
         sqlite-dev \
         curl-dev \
-        llvm13 \
+        llvm19 \
+        clang19 \
     ### build packages from edge repo
     && apk add --virtual .build-deps-edge \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
@@ -43,7 +44,7 @@ RUN apk upgrade --update \
         protobuf-c-dev \
         poppler \
         clang \
-        llvm11-dev \
+        llvm19-dev \
         tiff-dev \
         json-c-dev \
     ### build packages from testing repo
@@ -124,8 +125,6 @@ RUN apk upgrade --update \
     && cd /usr/src/postgis-${POSTGIS_VERSION} \
     && ./configure \
 		--disable-gtktest \
-        # FIXME: otherwise LTO produces a "LLVM ERROR: ThinLTO cannot create input file: Invalid record"
-        CFLAGS="-D LLVM_ENABLE_LTO=OFF" \ 
     && make -j $(nproc) \
     && make install \
 #

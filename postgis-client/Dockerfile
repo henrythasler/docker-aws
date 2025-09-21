@@ -1,5 +1,5 @@
 ### build environment
-FROM golang:1.19.0-alpine3.16 AS build
+FROM golang:1.25.1-alpine3.22 AS build
 
 ### update apk and existing packages
 RUN apk upgrade --update \
@@ -17,9 +17,9 @@ RUN apk upgrade --update \
 
 RUN wget -O - http://m.m.i24.cc/osmconvert.c | cc -x c - -lz -O3 -o /osmconvert
 
-RUN go install github.com/omniscale/imposm3/cmd/imposm@v0.11.1
+RUN go install github.com/omniscale/imposm3/cmd/imposm@v0.14.2
 
-FROM alpine:3.16.1
+FROM alpine:3.22.1
 # This docker-image can be run in AWS batch.
 
 ### update apk and existing packages
