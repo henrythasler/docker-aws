@@ -1,10 +1,10 @@
-FROM postgres:16.10-alpine3.22
+FROM postgres:18.3-alpine3.23
 
 ### Versions
-ARG CGAL_VERSION="6.0.2"
+ARG CGAL_VERSION="6.1.1"
 ARG SFCGAL_VERSION="2.2.0"
-ARG PROJ_VERSION="9.7.0"
-ARG POSTGIS_VERSION="3.6.0"
+ARG PROJ_VERSION="9.8.1"
+ARG POSTGIS_VERSION="3.6.3"
 
 ### Download Locations
 ARG CGAL_SOURCE="https://github.com/CGAL/cgal/releases/download/v$CGAL_VERSION/CGAL-$CGAL_VERSION.tar.xz"
@@ -13,9 +13,9 @@ ARG PROJ_SOURCE="https://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz"
 ARG POSTGIS_SOURCE="https://download.osgeo.org/postgis/source/postgis-$POSTGIS_VERSION.tar.gz"
 
 ### Checksums (MUST match the version)
-ARG CGAL_SHA256="f30c5be7c25a2a3ea24bccbaab5cf63fafda63c0279f34d7e7f8b3212821fed6"
-ARG PROJ_MD5="b7188aab7a22613a2f5a0bc41c4077b0"
-ARG POSTGIS_MD5="469182b48dddf39c8d26da2e3cca9781"
+ARG CGAL_SHA256="52506935f70e247ed2777e3c65f20e86f79208c2a2d0e180ae7475daf11c96ef"
+ARG PROJ_MD5="337d10673c73377fb83d7c7ddbe8a5c4"
+ARG POSTGIS_MD5="5b4b93c7cba86cd2f687890390ee2729"
 
 ### update apk and existing packages
 RUN apk upgrade --update \
