@@ -1,4 +1,4 @@
-FROM postgres:18.3-alpine3.23
+FROM docker.io/postgres:18.3-alpine3.23
 
 ### Versions
 ARG CGAL_VERSION="6.1.1"
