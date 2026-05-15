@@ -1,4 +1,7 @@
-FROM docker.io/postgres:18.3-alpine3.23
+### local
+# FROM docker.io/postgres:18.3-alpine3.23
+### AWS codebuild
+FROM public.ecr.aws/docker/library/postgres:18.3-alpine3.23
 
 ### Versions
 ARG CGAL_VERSION="6.1.1"
