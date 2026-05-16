@@ -23,7 +23,7 @@ RUN go install github.com/omniscale/imposm3/cmd/imposm@v0.14.2
 
 # FROM alpine:3.22.1
 ### AWS codebuild
-FROM public.ecr.aws/docker/library/FROM alpine:3.22.1
+FROM public.ecr.aws/docker/library/alpine:3.22.1
 
 # This docker-image can be run in AWS batch.
 
