@@ -115,7 +115,8 @@ RUN apk upgrade --update \
 ### SFCGAL installation (https://oslandia.github.io/SFCGAL/installation.html)
     && cd /usr/src/SFCGAL-v${SFCGAL_VERSION} \
     && cmake . -Wno-dev -Wno-deprecated -Wdeprecated-declarations \
-    && make -j $(nproc) \
+    # avoid OOM kills on 8GB codebuild instance    
+    && make -j 2 \
     && make install \
 #
 ### PROJ installation (https://proj.org/install.html#compilation-and-installation-from-source-code)
