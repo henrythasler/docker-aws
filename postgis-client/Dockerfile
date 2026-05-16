@@ -1,36 +1,36 @@
 ### build environment
-# FROM golang:1.25.1-alpine3.22 AS build
+# FROM golang:1.26.3-alpine3.23 AS build
 ### AWS codebuild
-FROM public.ecr.aws/docker/library/golang:1.25.1-alpine3.22 AS build
+FROM public.ecr.aws/docker/library/golang:1.26.3-alpine3.23 AS build
 
 ### update apk and existing packages
 RUN apk upgrade --update \
     ### build packages
-    && apk add \
+    && apk add --no-cache \
         build-base \    
         git \
         zlib-dev \
-    && apk add \
+    && apk add --no-cache \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
         leveldb-dev \
         geos-dev
     # && apk add \
     #     --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
 
-RUN wget -O - http://m.m.i24.cc/osmconvert.c | cc -x c - -lz -O3 -o /osmconvert
+RUN wget -O - http://m.m.i24.cc/osmconvert.c | cc -std=gnu99 -x c - -lz -O3 -o /osmconvert
 
 RUN go install github.com/omniscale/imposm3/cmd/imposm@v0.14.2
 
-# FROM alpine:3.22.1
+# FROM alpine:3.23.4
 ### AWS codebuild
-FROM public.ecr.aws/docker/library/alpine:3.22.1
+FROM public.ecr.aws/docker/library/alpine:3.23.4
 
 # This docker-image can be run in AWS batch.
 
 ### update apk and existing packages
 RUN apk upgrade --update \
     ### packages from main repo
-    && apk add \
+    && apk add --no-cache \
         bash \ 
         wget \
         curl \
@@ -38,17 +38,16 @@ RUN apk upgrade --update \
         postgresql-client \
         gdal-tools \
     ### packages from other repos
-    && apk add --virtual .build-deps-edge \
+    && apk add --no-cache --virtual .build-deps-edge \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
         poppler \
-    && apk add \
+    && apk add --no-cache --virtual .build-deps-edge-community \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
         leveldb \
         geos \
         postgis \
         aws-cli \
-        proj-dev \
-    && rm -rf /var/cache/apk/*
+        proj-dev
 
 COPY fetch_and_run.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/fetch_and_run.sh
